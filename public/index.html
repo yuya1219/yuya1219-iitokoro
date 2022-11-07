@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="assessment.css">
+  <link rel="stylesheet" href="assessment.css?202211071603">
   <title>あなたのいいところ診断</title>
 </head>
 
@@ -12,7 +12,7 @@
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-analytics.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.9.2/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-auth.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -54,6 +54,59 @@
           alert('登録に失敗しました[' + error.message + ']');
         });
     });
+
+    // ログイン処理
+    const loginForm = document.getElementById('login-form');
+    const mailAddressInput = document.getElementById('mailAddress');
+    const passwordInput = document.getElementById('password');
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const mailAddress = mailAddressInput.value;
+      const password = passwordInput.value;
+      signInWithEmailAndPassword(auth, mailAddress, password)
+        .then(() => {
+          // ログインフォームを初期化
+          mailAddressInput.value = '';
+          passwordInput.value = '';
+        })
+        .catch((error) => {
+          alert('ログインに失敗しました[' + error.message + ']');
+        });
+    });
+
+    // ログアウト処理
+    const logoutButton = document.getElementById('logoutButton');
+    logoutButton.addEventListener('click', () => {
+      signOut(auth);
+    });
+
+    // ログイン周りの処理の各エリア
+    const userArea = document.getElementById('user-area');
+    const loginArea = document.getElementById('login-area');
+    const registerArea = document.getElementById('register-area');
+
+    // 認証状態の変更を画面に反映する
+    onAuthStateChanged(auth, (user) => {
+
+      // ログイン周りの処理の各エリア全てを一旦非表示にする
+      userArea.style.display = 'none';
+      loginArea.style.display = 'none';
+      registerArea.style.display = 'none';
+
+      const userEmailText = document.getElementById('user-email-text');
+      if (user) {
+        userEmailText.innerText = user.email;
+        // ログインしている場合のエリアを表示する
+        userArea.style.display = 'block';
+      } else {
+        userEmailText.innerText = '';
+        // ログインしていない場合のエリアを表示する
+        loginArea.style.display = 'block';
+        registerArea.style.display = 'block';
+      }
+    });
+
+
   </script>
 
   <h1>あなたのいいところは?</h1>
